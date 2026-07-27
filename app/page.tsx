@@ -16,7 +16,7 @@ export default function Home() {
         <CardHeader>
           <Badge className="mb-2 w-fit">Phase 1</Badge>
 
-          <CardTitle className="text-3xl">ApplyFlow</CardTitle>
+          <CardTitle className="text-3xl">CareerHQ</CardTitle>
 
           <CardDescription className="text-base">
             Track job applications, interviews, follow-ups and résumé versions
