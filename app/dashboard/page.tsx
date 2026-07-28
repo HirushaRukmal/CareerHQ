@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { logout } from "@/app/auth/actions";
 import { createApplication, deleteApplication } from "@/app/dashboard/actions";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -391,6 +392,15 @@ export default async function DashboardPage({
                     )}
 
                     <div className="mt-5 flex flex-wrap gap-3">
+                      <Link
+                        href={`/dashboard/applications/${application.id}`}
+                        className={buttonVariants({
+                          variant: "outline",
+                          size: "sm",
+                        })}
+                      >
+                        View / edit
+                      </Link>
                       {application.job_url && (
                         <a
                           href={application.job_url}

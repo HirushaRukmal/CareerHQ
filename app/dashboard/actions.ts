@@ -155,6 +155,89 @@ export async function createApplication(formData: FormData) {
     )
 }
 
+export async function updateApplication(formData: FormData) {
+    const applicationIdResult = z
+        .string()
+        .uuid()
+        .safeParse(formData.get("applicationId"))
+
+    if (!applicationIdResult.success) {
+        redirect("/dashboard?error=Invalid application.")
+    }
+
+    const applicationId = applicationIdResult.data
+
+    const result = applicationSchema.safeParse({
+        companyName: formData.get("companyName"),
+        jobTitle: formData.get("jobTitle"),
+        status: formData.get("status"),
+        location: formData.get("location"),
+        employmentType: formData.get("employmentType"),
+        jobUrl: formData.get("jobUrl"),
+        appliedAt: formData.get("appliedAt"),
+        followUpAt: formData.get("followUpAt"),
+        notes: formData.get("notes"),
+    })
+
+    if (!result.success) {
+        const message =
+            result.error.issues[0]?.message ??
+            "Check the application information."
+
+        redirect(
+            `/dashboard/applications/${applicationId}?error=${encodeURIComponent(
+                message
+            )}`
+        )
+    }
+
+    const { supabase, userId } =
+        await getAuthenticatedClient()
+
+    const {
+        data: updatedApplication,
+        error,
+    } = await supabase
+        .from("applications")
+        .update({
+            company_name: result.data.companyName,
+            job_title: result.data.jobTitle,
+            status: result.data.status,
+            location: result.data.location ?? null,
+            employment_type:
+                result.data.employmentType ?? null,
+            job_url: result.data.jobUrl ?? null,
+            applied_at: result.data.appliedAt ?? null,
+            follow_up_at: result.data.followUpAt ?? null,
+            notes: result.data.notes ?? null,
+        })
+        .eq("id", applicationId)
+        .eq("user_id", userId)
+        .select("id")
+        .maybeSingle()
+
+    if (error || !updatedApplication) {
+        console.error("Update application error:", error)
+
+        redirect(
+            `/dashboard/applications/${applicationId}?error=${encodeURIComponent(
+                "The application could not be updated."
+            )}`
+        )
+    }
+
+    revalidatePath("/dashboard")
+    revalidatePath(
+        `/dashboard/applications/${applicationId}`
+    )
+
+    redirect(
+        `/dashboard/applications/${applicationId}?message=${encodeURIComponent(
+            "Application updated successfully."
+        )}`
+    )
+}
+
 export async function deleteApplication(
     formData: FormData
 ) {
